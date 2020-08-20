@@ -16,6 +16,7 @@ const App = () => {
   const [pokemonsData, setPokemonsData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [filteredPokemons, setFilteredPokemons] = useState([]);
+  const [isMaxCPChecked, setIsMaxCPChecked] = useState(false);
 
   const fetchPokemons = async () => {
     setIsLoading(true);
@@ -43,44 +44,59 @@ const App = () => {
   const searchInputChangeHandler = async e => {
     const value = e.target.value;
     setSearchInputText(value);
-    filterPokemons(value.toUpperCase());
+    filterPokemons(value);
   };
 
-  const filterPokemons = value => {
+  const maxCPCheckboxHandler = e => {
+    const checked = e.target.checked;
+    setIsMaxCPChecked(checked);
+    filterPokemons(searchInputText, checked);
+  };
+
+  const filterPokemons = (value, byMaxCP = false) => {
+    value = value.toUpperCase();
+    let sortType = "default";
     const sortBy = {
       name: arr => arr.sort((a, b) => a.Name.localeCompare(b.Name)),
       type: arr => arr.sort((a, b) => (a.Types[0] ? a.Types[0].localeCompare(b.Types[0]) : -1)),
+      maxCP: arr => arr.sort((a, b) => a.MaxCP - b.MaxCP),
       default: arr => arr
     };
-    let matchedProp = "default";
+
     const dataFiltered = pokemonsData.filter(pokemonData => {
       if (
         pokemonData.Name.toUpperCase().indexOf(value) > -1 ||
         pokemonData.Types.some(type => type.toUpperCase().indexOf(value) > -1)
       ) {
         if (pokemonData.Name.toUpperCase().indexOf(value) > -1) {
-          matchedProp = "name";
+          sortType = "name";
         } else {
-          matchedProp = "type";
+          sortType = "type";
         }
         return true;
       }
       return false;
     });
-
-    setFilteredPokemons(sortBy[matchedProp](dataFiltered.slice(0, 4)));
+    sortType = byMaxCP ? "maxCP" : sortType;
+    setFilteredPokemons(sortBy[sortType](dataFiltered.slice(0, 4)));
   };
 
   return (
     <>
-      <Checkbox name="maxCP" label="Maximum Combat Points" className="max-cp" />
+      <Checkbox
+        name="maxCP"
+        label="Maximum Combat Points"
+        className="max-cp"
+        onChange={maxCPCheckboxHandler}
+        checked={isMaxCPChecked}
+      />
       <InputSearch onChange={searchInputChangeHandler} value={searchInputText} />
       {isLoading ? (
         <Loader />
       ) : (
         <SuggestionsList>
           {filteredPokemons.length > 0 ? (
-            filteredPokemons.map(pokemonData => <PokemonItem key={pokemonData.Name} data={pokemonData} />)
+            filteredPokemons.map(pokemonData => <PokemonItem key={pokemonData.Number} data={pokemonData} />)
           ) : (
             <EmptyItem />
           )}
