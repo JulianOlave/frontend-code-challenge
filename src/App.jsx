@@ -44,40 +44,47 @@ const App = () => {
   const searchInputChangeHandler = async e => {
     const value = e.target.value;
     setSearchInputText(value);
-    filterPokemons(value);
+    value && filterPokemons(value);
+    !value && setFilteredPokemons(pokemonsData);
   };
 
   const maxCPCheckboxHandler = e => {
     const checked = e.target.checked;
     setIsMaxCPChecked(checked);
-    filterPokemons(searchInputText, checked);
+    if (!searchInputText.trim()) {
+      setFilteredPokemons(sortBy[checked ? "maxCP" : "name"](pokemonsData));
+    } else {
+      filterPokemons(searchInputText, checked);
+    }
+  };
+
+  const sortBy = {
+    name: arr => [...arr].sort((a, b) => a.Name.localeCompare(b.Name)),
+    type: arr => [...arr].sort((a, b) => (a.Types[0] ? a.Types[0].localeCompare(b.Types[0]) : -1)),
+    maxCP: arr => [...arr].sort((a, b) => b.MaxCP - a.MaxCP),
+    default: arr => arr
   };
 
   const filterPokemons = (value, byMaxCP = false) => {
     value = value.toUpperCase();
-    if (!value) return setFilteredPokemons(pokemonsData);
     let sortType = "default";
-    const sortBy = {
-      name: arr => arr.sort((a, b) => a.Name.localeCompare(b.Name)),
-      type: arr => arr.sort((a, b) => (a.Types[0] ? a.Types[0].localeCompare(b.Types[0]) : -1)),
-      maxCP: arr => arr.sort((a, b) => a.MaxCP - b.MaxCP),
-      default: arr => arr
-    };
 
-    const dataFiltered = pokemonsData.filter(pokemonData => {
-      if (
-        pokemonData.Name.toUpperCase().indexOf(value) > -1 ||
-        pokemonData.Types.some(type => type.toUpperCase().indexOf(value) > -1)
-      ) {
-        if (pokemonData.Name.toUpperCase().indexOf(value) > -1) {
-          sortType = "name";
-        } else {
-          sortType = "type";
-        }
-        return true;
-      }
-      return false;
-    });
+    const dataFiltered = !value
+      ? pokemonsData
+      : pokemonsData.filter(pokemonData => {
+          if (
+            pokemonData.Name.toUpperCase().indexOf(value) > -1 ||
+            pokemonData.Types.some(type => type.toUpperCase().indexOf(value) > -1)
+          ) {
+            if (pokemonData.Name.toUpperCase().indexOf(value) > -1) {
+              sortType = "name";
+            } else {
+              sortType = "type";
+            }
+            return true;
+          }
+          return false;
+        });
     sortType = byMaxCP ? "maxCP" : sortType;
     const sortedData = sortBy[sortType](dataFiltered);
     setFilteredPokemons(sortedData.slice(0, 4));
