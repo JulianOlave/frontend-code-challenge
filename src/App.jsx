@@ -43,17 +43,32 @@ const App = () => {
   const searchInputChangeHandler = async e => {
     const value = e.target.value;
     setSearchInputText(value);
-    filterPokemons(value);
+    filterPokemons(value.toUpperCase());
   };
 
   const filterPokemons = value => {
+    const sortBy = {
+      name: arr => arr.sort((a, b) => a.Name.localeCompare(b.Name)),
+      type: arr => arr.sort((a, b) => (a.Types[0] ? a.Types[0].localeCompare(b.Types[0]) : -1)),
+      default: arr => arr
+    };
+    let matchedProp = "default";
     const dataFiltered = pokemonsData.filter(pokemonData => {
-      if (pokemonData.Name.indexOf(value) > -1 || pokemonData.Types.some(type => type.indexOf(value) > -1)) {
+      if (
+        pokemonData.Name.toUpperCase().indexOf(value) > -1 ||
+        pokemonData.Types.some(type => type.toUpperCase().indexOf(value) > -1)
+      ) {
+        if (pokemonData.Name.toUpperCase().indexOf(value) > -1) {
+          matchedProp = "name";
+        } else {
+          matchedProp = "type";
+        }
         return true;
       }
+      return false;
     });
 
-    setFilteredPokemons(dataFiltered.slice(0, 4));
+    setFilteredPokemons(sortBy[matchedProp](dataFiltered.slice(0, 4)));
   };
 
   return (
