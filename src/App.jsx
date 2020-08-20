@@ -96,7 +96,9 @@ const App = () => {
       ) : (
         <SuggestionsList>
           {filteredPokemons.length > 0 ? (
-            filteredPokemons.map(pokemonData => <PokemonItem key={pokemonData.Number} data={pokemonData} />)
+            filteredPokemons.map(pokemonData => (
+              <PokemonItem key={pokemonData.Number} data={pokemonData} searchedValue={searchInputText} />
+            ))
           ) : (
             <EmptyItem />
           )}
