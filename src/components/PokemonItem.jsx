@@ -1,14 +1,16 @@
 import React from "react";
 
-const PokemonItem = props => (
-  <li key={props.Name}>
-    <img src={props.data.img} alt="" />
+const PokemonItem = ({ data }) => (
+  <li>
+    <img src={data.img} alt="" />
     <div className="info">
       <h1>
-        <span className="hl">{props.data.Name}</span>
+        <span className="hl">{data.Name}</span>
       </h1>
-      {props.data.Types.map(type => (
-        <span className="type electric">{type}</span>
+      {data.Types.map(type => (
+        <span key={type} className="type electric">
+          {type}
+        </span>
       ))}
     </div>
   </li>

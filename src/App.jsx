@@ -13,9 +13,12 @@ const URL_PATH =
 
 const App = () => {
   const [searchInputText, setSearchInputText] = useState("");
-  const [pokemonData, setPokemonData] = useState([]);
+  const [pokemonsData, setPokemonsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [filteredPokemons, setFilteredPokemons] = useState([]);
 
   const fetchPokemons = async () => {
+    setIsLoading(true);
     let response = [];
     try {
       response = await fetch(URL_PATH);
@@ -23,7 +26,9 @@ const App = () => {
     } catch (error) {
       console.log(error);
     } finally {
-      setPokemonData(response);
+      window._jio = response;
+      setPokemonsData(response);
+      setIsLoading(false);
     }
   };
 
@@ -31,33 +36,41 @@ const App = () => {
     fetchPokemons();
   }, []);
 
+  useEffect(() => {
+    setFilteredPokemons(pokemonsData);
+  }, [pokemonsData]);
+
   const searchInputChangeHandler = async e => {
     const value = e.target.value;
     setSearchInputText(value);
-    let data = await fetchPokemons();
+    filterPokemons(value);
+  };
 
-    if (data !== null) {
-      const dataFiltered = data.filter(pok => {
-        if (pok.Name.indexOf(value) > -1) {
-          return true;
-        }
-      });
+  const filterPokemons = value => {
+    const dataFiltered = pokemonsData.filter(pokemonData => {
+      if (pokemonData.Name.indexOf(value) > -1 || pokemonData.Types.some(type => type.indexOf(value) > -1)) {
+        return true;
+      }
+    });
 
-      console.log(dataFiltered);
-
-      setPokemonData(data);
-    }
+    setFilteredPokemons(dataFiltered.slice(0, 4));
   };
 
   return (
     <>
       <Checkbox name="maxCP" label="Maximum Combat Points" className="max-cp" />
       <InputSearch onChange={searchInputChangeHandler} value={searchInputText} />
-      <SuggestionsList>
-        {pokemonData.map(pokemon => (
-          <PokemonItem data={pokemon} />
-        ))}
-      </SuggestionsList>
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <SuggestionsList>
+          {filteredPokemons.length > 0 ? (
+            filteredPokemons.map(pokemonData => <PokemonItem key={pokemonData.Name} data={pokemonData} />)
+          ) : (
+            <EmptyItem />
+          )}
+        </SuggestionsList>
+      )}
     </>
   );
 };
