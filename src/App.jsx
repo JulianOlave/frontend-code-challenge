@@ -55,6 +55,7 @@ const App = () => {
 
   const filterPokemons = (value, byMaxCP = false) => {
     value = value.toUpperCase();
+    if (!value) return setFilteredPokemons(pokemonsData);
     let sortType = "default";
     const sortBy = {
       name: arr => arr.sort((a, b) => a.Name.localeCompare(b.Name)),
