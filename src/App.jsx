@@ -79,7 +79,8 @@ const App = () => {
       return false;
     });
     sortType = byMaxCP ? "maxCP" : sortType;
-    setFilteredPokemons(sortBy[sortType](dataFiltered.slice(0, 4)));
+    const sortedData = sortBy[sortType](dataFiltered);
+    setFilteredPokemons(sortedData.slice(0, 4));
   };
 
   return (
