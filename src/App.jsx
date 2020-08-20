@@ -52,7 +52,7 @@ const App = () => {
     const checked = e.target.checked;
     setIsMaxCPChecked(checked);
     if (!searchInputText.trim()) {
-      setFilteredPokemons(sortBy[checked ? "maxCP" : "name"](pokemonsData));
+      setFilteredPokemons(checked ? sortBy.maxCP(pokemonsData) : pokemonsData);
     } else {
       filterPokemons(searchInputText, checked);
     }
